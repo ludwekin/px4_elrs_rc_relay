@@ -1,11 +1,27 @@
-# HSRCF405_TF PX4 Board Support
+# PX4 ELRS RC Relay + HSRCF405_TF Board Support
 
-PX4 v1.15.3 board support + tools for the **HSRCF405_TF** STM32F405 flight
-controller. Built and tested on real hardware (IMU, baro, ADC, 4 motors with
-DShot600, ELRS/CRSF RC on UART1, USB MAVLink).
+**PX4 ELRS RC Relay**: read `RC_CHANNELS` from PX4 over USB MAVLink and expose
+them as a Linux virtual gamepad (`PX4 ELRS RC`) for simulators, with a live
+GUI monitor. The repo also contains the full PX4 v1.15.3 board support used on
+the **HSRCF405_TF** STM32F405 flight controller.
 
-> 本仓库包含 PX4 板级支持、编译脚本、DFU 刷机脚本，以及把飞控 RC 数据转成
-> Linux 虚拟手柄 / GUI 监视器的工具。
+![RC monitor](docs/screenshot.png)
+
+> 用途：把飞控收到的 ELRS/CRSF RC 数据通过 USB MAVLink 转成 Linux 标准虚拟
+> 手柄（uinput），直接给穿越机模拟器用；附带 GUI 实时显示摇杆、开关和 16 个
+> 通道，以及 HSRCF405_TF 的 PX4 板级支持、编译和 DFU 刷机脚本。
+
+## Quick start (RC relay)
+
+```bash
+# Close QGroundControl first (it owns /dev/ttyACM0)
+python3 tools/rc_monitor_gui.py      # GUI + virtual gamepad
+# or headless:
+python3 tools/rc_to_hid.py
+```
+
+The virtual device is named `PX4 ELRS RC`; select it in your simulator.
+Writing to `/dev/uinput` must be permitted.
 
 ## Hardware
 
