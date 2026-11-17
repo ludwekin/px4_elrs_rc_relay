@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# HSRCF405_TF specific board extras init
+#------------------------------------------------------------------------------
+
+# Nothing board specific yet.

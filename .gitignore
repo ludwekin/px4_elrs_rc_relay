@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.log
+logs/
+build/
+*.map
+*.elf
+*.px4
+.DS_Store

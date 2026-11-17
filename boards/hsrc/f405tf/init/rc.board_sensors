@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# HSRCF405_TF specific board sensors init
+#------------------------------------------------------------------------------
+
+board_adc start
+
+# ICM42605 on SPI1, mounted rotated 90 degrees clockwise (Betaflight CW90_DEG)
+icm42605 -R 2 -s start
+
+# DPS310 barometer on I2C1 (PB8/PB9), 7-bit address 0x76
+dps310 -a 0x76 -X start

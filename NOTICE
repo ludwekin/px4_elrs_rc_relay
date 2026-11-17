@@ -1,0 +1,20 @@
+Third-party components and licenses
+===================================
+
+PX4-Autopilot
+  The board support files are derived from PX4-Autopilot v1.15.3
+  (https://github.com/PX4/PX4-Autopilot), licensed under BSD-3-Clause.
+  The prebuilt F405 bootloader (firmware/px4_bootloader_flywoo.bin) is the
+  PX4 bootloader shipped for the flywoo/gn-f405 board (BSD-3-Clause).
+
+Betaflight
+  betaflight-target/config.h is the reconstructed Betaflight target for this
+  board and is licensed under GPLv3, like Betaflight itself
+  (https://github.com/betaflight/betaflight). It is kept separate from the
+  BSD-3-Clause board support and tools.
+
+NuttX
+  Built as part of PX4; see the PX4/NuttX submodules for their licenses.
+
+The original factory firmware backup and CLI dumps are not part of this
+repository because they contain the unique MCU ID and vendor configuration.

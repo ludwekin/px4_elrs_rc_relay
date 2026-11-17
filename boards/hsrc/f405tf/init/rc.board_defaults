@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# HSRCF405_TF board specific defaults
+#
+# NOTE: this board runs the full flight stack on a 128K+64K F405, so RAM is
+# very tight. The SD logger and MSP OSD are intentionally disabled.
+#------------------------------------------------------------------------------
+
+# --- Airframe / arming -------------------------------------------------------
+# Force (not set-default) so a stale parameters_backup.bson on the SD card
+# cannot override these on boot. 4001 = Generic Quadcopter X.
+param set SYS_AUTOSTART 4001
+
+# No power module / no safety switch populated
+param set CBRK_SUPPLY_CHK 894281
+param set CBRK_IO_SAFETY 22027
+
+# --- Serial port assignment (see default.px4board) ---------------------------
+#   UART1 ttyS0 = RC (ELRS/CRSF, receiver TX -> PB7/RX1)
+#   UART2 ttyS1 = spare
+#   UART3 ttyS2 = GPS1
+#   UART4 ttyS3 = TEL4
+#   UART5 ttyS4 = TEL3
+#   UART6 ttyS5 = TEL2 (MAVLink)
+param set GPS_1_CONFIG 201
+param set RC_PORT_CONFIG 101
+param set MAV_0_CONFIG 102
+
+# ELRS outputs CRSF; lock the RC input protocol to CRSF
+param set RC_INPUT_PROTO 6
+
+# USB MAVLink: 2 = onboard (known-good on this USB/HSI setup)
+param set USB_MAV_MODE 2
+
+param set-default SER_TEL1_BAUD 57600
+
+# --- Motor / control allocation ---------------------------------------------
+# Quad X, PX4 numbering: M1 PC8, M2 PC9, M3 PA8, M4 PA9
+# (M6 PB4 / M7 PB0 / M8 PB1 are available as extra outputs, not used by quad)
+param set CA_ROTOR_COUNT 4
+param set CA_ROTOR0_PX 1.0
+param set CA_ROTOR0_PY 1.0
+param set CA_ROTOR1_PX -1.0
+param set CA_ROTOR1_PY -1.0
+param set CA_ROTOR2_PX 1.0
+param set CA_ROTOR2_PY -1.0
+param set CA_ROTOR2_KM -0.05
+param set CA_ROTOR3_PX -1.0
+param set CA_ROTOR3_PY 1.0
+param set CA_ROTOR3_KM -0.05
+
+param set PWM_MAIN_FUNC1 101
+param set PWM_MAIN_FUNC2 102
+param set PWM_MAIN_FUNC3 103
+param set PWM_MAIN_FUNC4 104
+
+# DShot600 on all three output timers (TIM8 / TIM1 / TIM3)
+param set PWM_MAIN_TIM0 -3
+param set PWM_MAIN_TIM1 -3
+param set PWM_MAIN_TIM2 -3
+
+# --- Battery (placeholders, MUST be calibrated) ------------------------------
+param set BAT1_V_DIV 11.2
+param set BAT1_A_PER_V 100.0
+
+# No onboard magnetometer; external compass on I2C1 is optional.
+# Set SYS_HAS_MAG=0 in QGC if flying without any compass.
+param set-default SYS_HAS_MAG 1
