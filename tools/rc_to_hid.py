@@ -42,6 +42,10 @@ BUTTON_CODES = [
 
 running = True
 
+# High-rate telemetry that competes with RC_CHANNELS on the USB MAVLink link.
+# Disable it while relaying RC so the RC stream stays low-latency.
+TRIM_MSG_IDS = [30, 31, 32, 105, 141, 74, 111, 83, 85, 42, 1, 245, 29, 241, 230, 147]
+
 
 def _sigint(_signum, _frame):
     global running
@@ -116,8 +120,11 @@ class RcToHid:
             self.mav.mav.command_long_send(
                 1, 1, 511, 0, 65, interval_us, 0, 0, 0, 0, 0
             )
+            if self.args.trim:
+                for msg_id in TRIM_MSG_IDS:
+                    self.mav.mav.command_long_send(1, 1, 511, 0, msg_id, -1, 0, 0, 0, 0, 0)
             print(f"[mav] connected to {self.args.port} (sys {hb.get_srcSystem()}, "
-                  f"RC_CHANNELS requested at {self.args.rate} Hz)")
+                  f"RC_CHANNELS requested at {self.args.rate} Hz, trim={self.args.trim})")
         except Exception as exc:
             print(f"[mav] connect failed: {exc}")
             self.mav = None
@@ -243,6 +250,8 @@ def main():
     parser.add_argument("--invert-pitch", action="store_true")
     parser.add_argument("--invert-yaw", action="store_true")
     parser.add_argument("--log", default=None, help="optional CSV log path")
+    parser.add_argument("--no-trim", dest="trim", action="store_false",
+                        help="do not disable other high-rate MAVLink streams")
     args = parser.parse_args()
     signal.signal(signal.SIGINT, _sigint)
     signal.signal(signal.SIGTERM, _sigint)

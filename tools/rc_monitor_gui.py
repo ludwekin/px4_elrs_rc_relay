@@ -46,6 +46,9 @@ AXES = [
 BUTTON_CODES = ([e.BTN_SOUTH, e.BTN_EAST, e.BTN_NORTH, e.BTN_WEST,
                  e.BTN_TL, e.BTN_TR, e.BTN_TL2, e.BTN_TR2] if HAVE_EVDEV else [])
 
+# High-rate telemetry that competes with RC_CHANNELS on the USB MAVLink link.
+TRIM_MSG_IDS = [30, 31, 32, 105, 141, 74, 111, 83, 85, 42, 1, 245, 29, 241, 230, 147]
+
 
 def clamp(v, lo, hi):
     return max(lo, min(hi, v))
@@ -165,13 +168,14 @@ class RcState:
 
 
 class Reader(threading.Thread):
-    def __init__(self, state, gamepad, port, baud, rate):
+    def __init__(self, state, gamepad, port, baud, rate, trim=True):
         super().__init__(daemon=True)
         self.state = state
         self.gamepad = gamepad
         self.port = port
         self.baud = baud
         self.rate = rate
+        self.trim = trim
         self.running = True
         self.mav = None
 
@@ -181,7 +185,10 @@ class Reader(threading.Thread):
             self.mav.wait_heartbeat(timeout=6)
             interval_us = int(1e6 / max(1, self.rate))
             self.mav.mav.command_long_send(1, 1, 511, 0, 65, interval_us, 0, 0, 0, 0, 0)
-            print("[mav] connected")
+            if self.trim:
+                for msg_id in TRIM_MSG_IDS:
+                    self.mav.mav.command_long_send(1, 1, 511, 0, msg_id, -1, 0, 0, 0, 0, 0)
+            print(f"[mav] connected (trim={self.trim})")
         except Exception as exc:
             print(f"[mav] connect failed: {exc}")
             self.mav = None
@@ -415,6 +422,8 @@ def main():
     parser.add_argument("--rate", type=int, default=50)
     parser.add_argument("--deadband", type=int, default=8)
     parser.add_argument("--no-hid", action="store_true")
+    parser.add_argument("--no-trim", dest="trim", action="store_false",
+                        help="do not disable other high-rate MAVLink streams")
     parser.add_argument("--invert-roll", action="store_true")
     parser.add_argument("--invert-pitch", action="store_true")
     parser.add_argument("--invert-yaw", action="store_true")
@@ -425,7 +434,7 @@ def main():
                              args.deadband)
     if args.no_hid:
         gamepad.enabled = False
-    reader = Reader(state, gamepad, args.port, args.baud, args.rate)
+    reader = Reader(state, gamepad, args.port, args.baud, args.rate, args.trim)
     reader.start()
 
     App(state, reader, gamepad).mainloop()
