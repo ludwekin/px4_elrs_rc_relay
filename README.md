@@ -30,8 +30,10 @@ Writing to `/dev/uinput` must be permitted.
 - Baro: DPS310 on I2C1 (PB8/PB9, 0x76)
 - SD card: SPI3 (SCK PC10, MISO PC11, MOSI PB5, CS PA15)
 - ADC3: VBAT PC1, current PC3, RSSI PC0
-- Motors: M1 PC8 (TIM8_CH3), M2 PC9 (TIM8_CH4), M3 PA8 (TIM1_CH1),
-  M4 PA9 (TIM1_CH2), M6 PB4 (TIM3_CH1), M7 PB0 (TIM3_CH3), M8 PB1 (TIM3_CH4)
+- Motors (8 outputs): M1 PC8 (TIM8_CH3), M2 PC9 (TIM8_CH4), M3 PA8 (TIM1_CH1),
+  M4 PA9 (TIM1_CH2), M5 PA10 (TIM1_CH3), M6 PB4 (TIM3_CH1),
+  M7 PB0 (TIM3_CH3), M8 PB1 (TIM3_CH4)
+- LED strip: PB3 (TIM2_CH2), 4 onboard + external WS2812B; not driven by PX4
 - UART1 PB6/PB7, UART2 PA2/PA3, UART3 PB10/PB11, UART4 PA0/PA1,
   UART5 PC12/PD2, UART6 PC6/PC7
 - USB FS: PA11/PA12
@@ -42,7 +44,7 @@ Writing to `/dev/uinput` must be permitted.
 
 - PX4 v1.15.3, board target `hsrc_f405tf_default`
 - HSI 16 MHz → 168 MHz PLL, PLLQ = 48 MHz USB
-- Quad X (airframe 4001), DShot600 on TIM8/TIM1/TIM3
+- Quad X (airframe 4001), DShot600 on TIM8/TIM1/TIM3; 8 PWM outputs available
 - ICM42605 (SPI1) + DPS310 (I2C1) + ADC3
 - Serial defaults:
   - UART1 = RC (ELRS/CRSF)

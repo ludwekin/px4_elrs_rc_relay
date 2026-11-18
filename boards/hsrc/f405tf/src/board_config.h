@@ -106,18 +106,22 @@
 #define BOARD_BATTERY1_V_DIV         (11.0f)
 #define BOARD_BATTERY1_A_PER_V       (100.0f)
 
-/* PWM / motor outputs (7 channels)
+/* PWM / motor outputs (8 channels)
  *
  * 0: PC8  TIM8_CH3   M1
  * 1: PC9  TIM8_CH4   M2
  * 2: PA8  TIM1_CH1   M3
  * 3: PA9  TIM1_CH2   M4
- * 4: PB4  TIM3_CH1   M6
- * 5: PB0  TIM3_CH3   M7
- * 6: PB1  TIM3_CH4   M8
+ * 4: PA10 TIM1_CH3   M5
+ * 5: PB4  TIM3_CH1   M6
+ * 6: PB0  TIM3_CH3   M7
+ * 7: PB1  TIM3_CH4   M8
+ *
+ * PB3 (TIM2_CH2) is the onboard WS2812 LED strip data pin; PX4 does not
+ * implement a WS2812 driver, so it is left unconfigured.
  */
 #define BOARD_NUM_IO_TIMERS         3
-#define DIRECT_PWM_OUTPUT_CHANNELS  7
+#define DIRECT_PWM_OUTPUT_CHANNELS  8
 #define BOARD_HAS_PWM               DIRECT_PWM_OUTPUT_CHANNELS
 
 /* High-resolution timer. TIM4 is not used for PWM and no 32.768 kHz LSE

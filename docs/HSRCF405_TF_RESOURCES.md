@@ -119,13 +119,13 @@ PX4 会使用自己的 bootloader / 分区；刷 PX4 前保留 1 MB 原厂备份
 | M2 | PC9 | TIM8_CH4 | DMA2 Stream 7 Ch 7 | |
 | M3 | PA8 | TIM1_CH1 | DMA2 Stream 6 Ch 0 | |
 | M4 | PA9 | TIM1_CH2 | DMA2 Stream 6 Ch 0 | |
-| M5 | — | — | — | 本板无 M5 |
+| M5 | PA10 | TIM1_CH3 | DMA2 Stream 6 Ch 0 | 参考设计/实测；原厂 dump 曾释放 M5（7 电机配置） |
 | M6 | PB4 | TIM3_CH1 | DMA1 Stream 4 Ch 5 | PB4 = NJTRST，需关 JTAG |
 | M7 | PB0 | TIM3_CH3 | DMA1 Stream 7 Ch 5 | |
 | M8 | PB1 | TIM3_CH4 | DMA1 Stream 2 Ch 5 | |
 
 - 原配置 `motor_pwm_protocol=DSHOT600`。
-- 7 路电机输出；PX4 `pwm_out` 按 7 通道配置。
+- 8 路电机输出（M1–M8）；PX4 `pwm_out` 按 8 通道配置。原厂 dump 的 `MOTOR 5 NONE` 是 7 电机软件配置，硬件实际有 M5=PA10。
 
 ### 5.2 LED
 
@@ -133,7 +133,7 @@ PX4 会使用自己的 bootloader / 分区；刷 PX4 前保留 1 MB 原厂备份
 |---|---|---|
 | LED0 | PC15 | 状态 LED |
 | LED1 | PC14 | 状态 LED |
-| LED_STRIP | PA10 | TIM1_CH3；原配置 32 颗 WS2812（4x8），GRB，亮度 16 |
+| LED_STRIP | PB3 | TIM2_CH2；实测 WS2812 数据（4 板载 + 外接灯带）；原配置 32 颗 WS2812（4x8），GRB，亮度 16 |
 
 - PC14 / PC15 复用为 LED，因此没有 32.768 kHz LSE 晶振；PX4 RTC 只能用 LSI 或外部 RTC。
 
@@ -154,7 +154,7 @@ PX4 会使用自己的 bootloader / 分区；刷 PX4 前保留 1 MB 原厂备份
 
 ### 5.5 舵机 / PPM
 
-- 当前未配置；PB3（TIM2_CH2）等定时器脚可作为预留。
+- PB3（TIM2_CH2）已用作 WS2812 LED_STRIP；PA10 是 M5，不再作为 LED。
 
 ## 6. ADC
 
@@ -176,11 +176,11 @@ TIMER_PIN_MAP( 0, PC8 , 2,  0)   // TIM8_CH3
 TIMER_PIN_MAP( 1, PC9 , 2,  0)   // TIM8_CH4
 TIMER_PIN_MAP( 2, PA8 , 1,  0)   // TIM1_CH1
 TIMER_PIN_MAP( 3, PA9 , 1,  0)   // TIM1_CH2
-TIMER_PIN_MAP( 4, PA10, 1,  0)   // TIM1_CH3
+TIMER_PIN_MAP( 4, PA10, 1,  0)   // TIM1_CH3 (M5)
 TIMER_PIN_MAP( 5, PB4 , 1,  0)   // TIM3_CH1
 TIMER_PIN_MAP( 6, PB0 , 2,  0)   // TIM3_CH3
 TIMER_PIN_MAP( 7, PB1 , 2,  0)   // TIM3_CH4
-TIMER_PIN_MAP( 8, PB3 , 1,  0)   // TIM2_CH2（当前未用）
+TIMER_PIN_MAP( 8, PB3 , 1,  0)   // TIM2_CH2 (LED_STRIP)
 TIMER_PIN_MAP( 9, PB8 , 1,  0)   // TIM4_CH3（I2C1_SCL 复用）
 TIMER_PIN_MAP(10, PB9 , 2, -1)   // TIM11_CH1（I2C1_SDA 复用，DMA 禁用）
 ```
@@ -231,14 +231,14 @@ dfu-util -a 0 -s 0x08000000:leave -D original_firmware_backup.bin
 4. **IMU：** ICM42605（WHO_AM_I 0x42）；确认 PX4 驱动支持，必要时添加。
 5. **Baro：** DPS310（I2C1，0x76），PX4 有驱动。
 6. **OSD：** UART4 `MSP + VTX MSP`（当前 MSP DisplayPort）；PX4 可用 `msp_osd`。MAX7456 资源存在但当前未使用，是否焊接需确认。
-7. **电机：** 7 路（M1–M4、M6–M8），M5 无；TIM8 / TIM1 / TIM3；PA10 是 LED strip，不是 M5。
+7. **电机：** 8 路（M1–M8），M5=PA10（TIM1_CH3）；TIM8 / TIM1 / TIM3。原厂 dump 的 `MOTOR 5 NONE` + `LED_STRIP A10` 是 7 电机软件配置，已按实测修正。
 8. **串口：** UART4 给 OSD；RC / Telemetry / GPS 用 UART1/2/3/5/6；UART2 的 PC0 是 ADC RSSI，不要当反相器。
 9. **ADC：** VBAT PC1 / Current PC3 / RSSI PC0，ADC3；Betaflight 标定值仅作起点，需实测分压 / 分流。
-10. **DMA：** 参考第 7 节；PA8 / PA9 / PA10 共用 DMA2 Stream 6，PX4 配置时注意冲突。
+10. **DMA：** 参考第 7 节；PA8 / PA9 / PA10 共用 DMA2 Stream 6（M3/M4/M5），PX4 配置时注意冲突；PB3 是 LED_STRIP。
 11. **JTAG / SWD：** PB3 / PB4 / PA15 被复用，JTAG 关闭；SWD PA13 / PA14 可用。
 12. **PINIO：** PC2 / PC5，129 反相推挽；功能未确认，先在 PX4 中预留或实测。
 13. **蜂鸣器：** PC13 反相；PX4 `tone_alarm` 需注意极性。
-14. **LED：** PC15 / PC14 状态灯；PA10 WS2812（TIM1_CH3）；PC14 / PC15 占用 LSE 引脚，无 32.768 kHz 晶振。
+14. **LED：** PC15 / PC14 状态灯；PB3 WS2812（TIM2_CH2，4 板载 + 外接灯带）；PC14 / PC15 占用 LSE 引脚，无 32.768 kHz 晶振。
 15. **电源树 / 连接器 / 无源器件：** 固件无法恢复，需要实物测绘；原厂原理图 / Gerber 已丢失。
 
 ## 10. SWD 调试（JTAG 不可用）
@@ -246,7 +246,7 @@ dfu-util -a 0 -s 0x08000000:leave -D original_firmware_backup.bin
 ### 10.1 含义
 
 - STM32F405 的调试口有两套：JTAG（TDI/TDO/TMS/TCK/nTRST）和 SWD（SWDIO/SWCLK）。
-- 本板 PB3(TDO)、PB4(nTRST)、PA15(TDI) 被复用为其他功能（PB4=M6，PA15=SD CS，PB3 预留），所以完整 JTAG 不可用。
+- 本板 PB3(TDO)=LED_STRIP、PB4(nTRST)=M6、PA15(TDI)=SD CS 被复用，所以完整 JTAG 不可用。
 - SWD 只用 PA13(SWDIO)、PA14(SWCLK)，这两个脚在本板没有被外设占用，因此 SWD 仍然可用。
 - SWD 与 USB DFU 是两回事：DFU 通过 USB 刷写；SWD 通过 ST-Link/J-Link 等硬件探针调试/刷写。
 

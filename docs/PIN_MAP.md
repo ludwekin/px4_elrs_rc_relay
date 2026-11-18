@@ -22,7 +22,7 @@
 | PA7  | `SPI_SDO 1`（MOSI） | AF5 | SPI1 MOSI | AF5 | |
 | PA8  | `MOTOR 3` | TIM1 CH1 / AF1 | 电机 M3 | TIM1 CH1 / AF1 | BF DMA2 S6 C0 |
 | PA9  | `MOTOR 4` | TIM1 CH2 / AF1 | 电机 M4 | TIM1 CH2 / AF1 | BF DMA2 S6 C0 |
-| PA10 | `LED_STRIP 1` | TIM1 CH3 / AF1 | LED 灯带（PX4 未实现） | TIM1 CH3 / AF1 | 原厂同时 `MOTOR 5 NONE`；见第 4 节 |
+| PA10 | `MOTOR 5` | TIM1 CH3 / AF1 | 电机 M5 | TIM1 CH3 / AF1 | 参考设计/实测：M5=PA10；原厂 dump 曾用 `MOTOR 5 NONE` + LED A10，见第 4 节 |
 | PA11 | USB DM | — | USB FS DM | — | |
 | PA12 | USB DP | — | USB FS DP | — | |
 | PA13 | SWDIO | — | SWD | — | JTAG 关闭，保留 SWD |
@@ -30,7 +30,7 @@
 | PA15 | `SDCARD_CS 1` | GPIO | SPI3 CS（SD 卡） | GPIO | JTDI；JTAG 关闭 |
 | PB0  | `MOTOR 7` | TIM3 CH3 / AF2 | 电机 M7 | TIM3 CH3 / AF2 | BF DMA1 S7 C5 |
 | PB1  | `MOTOR 8` | TIM3 CH4 / AF2 | 电机 M8 | TIM3 CH4 / AF2 | BF DMA1 S2 C5 |
-| PB3  | 无资源（原厂有 `timer B03 AF1`） | TIM2 CH2 / AF1 | 预留 | — | JTDO；参考设计曾用作 LED_STRIP，原厂改到 A10 |
+| PB3  | `LED_STRIP 1` | TIM2 CH2 / AF1 | LED 灯带（PX4 未驱动） | — | JTDO；实测 WS2812 数据脚（4 板载 + 外接灯带） |
 | PB4  | `MOTOR 6` | TIM3 CH1 / AF2 | 电机 M6 | TIM3 CH1 / AF2 | NJTRST；JTAG 关闭；BF DMA1 S4 C5 |
 | PB5  | `SPI_SDO 3`（MOSI） | AF6 | SPI3 MOSI（SD 卡） | AF6 | **本板专用**；参考设计是 PC12 |
 | PB6  | `SERIAL_TX 1` | AF7 | UART1 TX（ttyS0） | AF7 | 最终 PX4：RC / ELRS |
@@ -69,8 +69,7 @@
 | M2 | PC9 | MOTOR 2 | Motor2 | TIM8 CH4 | DMA2 S7 C7 |
 | M3 | PA8 | MOTOR 3 | Motor3 | TIM1 CH1 | DMA2 S6 C0 |
 | M4 | PA9 | MOTOR 4 | Motor4 | TIM1 CH2 | DMA2 S6 C0 |
-| —  | PA10 | **MOTOR 5 NONE** | （LED_STRIP） | TIM1 CH3 | — |
-| M5 | — | 无 | 无 | — | 本板无 M5 |
+| M5 | PA10 | MOTOR 5 | Motor5 | TIM1 CH3 | BF DMA2 S6 C0；原厂 dump 曾设为 NONE |
 | M6 | PB4 | MOTOR 6 | Motor6 | TIM3 CH1 | DMA1 S4 C5 |
 | M7 | PB0 | MOTOR 7 | Motor7 | TIM3 CH3 | DMA1 S7 C5 |
 | M8 | PB1 | MOTOR 8 | Motor8 | TIM3 CH4 | DMA1 S2 C5 |
@@ -91,19 +90,21 @@
 
 | 来源 | LED_STRIP | MOTOR 5 |
 |---|---|---|
-| 原厂 full dump / `diff all` | **A10** | **NONE** |
-| 本仓库 PX4 / 重建 BF target | A10 | 无 M5 |
-| 参考设计 HAKRCF405V2 / CADDXF4 | PB3 | PA10 |
-| 曾经刷错的 BF 固件（参考 target） | PB3 | PA10 |
+| 原厂 full dump / `diff all` | A10 | NONE |
+| 参考设计 HAKRCF405V2 / CADDXF4 | **PB3** | **PA10** |
+| 实测硬件（本板，8 电机） | **PB3** | **PA10** |
+| 早期 PX4 / 重建 BF target（已修正） | A10 | 无 M5 |
 
-原因：本板把 WS2812 数据脚布在 **PA10（TIM1_CH3）**；参考设计把 PA10 当第 5 路电机，并用 PB3 做 LED_STRIP。原厂因此需要：
+结论：本板硬件与参考设计一致：**M5=PA10，LED_STRIP=PB3**。原厂 `diff all` 是一份**7 电机软件配置**（释放 M5、把 LED 放到 A10），不代表硬件没有 M5；商品也确认支持 8 电机。
+
+正确的 BF 资源：
 
 ```text
-resource MOTOR 5 NONE
-resource LED_STRIP 1 A10
+resource MOTOR 5 A10
+resource LED_STRIP 1 B03
 ```
 
-否则电机混控/DSHOT 会占用 PA10，LED 灯带无法工作。
+早期按原厂 dump 改成 `MOTOR 5 NONE` + `LED_STRIP A10` 是错的：PA10 上的 M5 被释放，PB3 的 LED 输出被挪走，灯带会卡在白色。
 
 ## 5. 定时器与 DMA
 
@@ -114,11 +115,11 @@ C08 AF3   TIM8 CH3   (M1)
 C09 AF3   TIM8 CH4   (M2)
 A08 AF1   TIM1 CH1   (M3)
 A09 AF1   TIM1 CH2   (M4)
-A10 AF1   TIM1 CH3   (LED_STRIP)
+A10 AF1   TIM1 CH3   (M5)
 B04 AF2   TIM3 CH1   (M6)
 B00 AF2   TIM3 CH3   (M7)
 B01 AF2   TIM3 CH4   (M8)
-B03 AF1   TIM2 CH2   (原厂无资源占用)
+B03 AF1   TIM2 CH2   (LED_STRIP)
 B08 AF2   TIM4 CH3   (I2C1_SCL 复用)
 B09 AF3   TIM11 CH1  (I2C1_SDA 复用)
 ```
@@ -165,7 +166,8 @@ USART3 RX : DMA1 Stream 1 Channel 4
 |---|---|---|---|
 | 板载状态灯 1 | PC15 | `LED 1` | LED0 |
 | 板载状态灯 2 | PC14 | `LED 2` | LED1 |
-| WS2812 数据 | PA10 | `LED_STRIP 1` | 未实现（预留） |
+| M5 | PA10 | `MOTOR 5` | Motor5 |
+| WS2812 数据 | PB3 | `LED_STRIP 1` | 未驱动（预留） |
 | 蜂鸣器 | PC13 | `BEEPER 1`（反相） | 反相蜂鸣器 |
 | PINIO1 | PC2 | `PINIO 1`（box 40） | PINIO1（预留） |
 | PINIO2 | PC5 | `PINIO 2`（box 41） | PINIO2（预留） |

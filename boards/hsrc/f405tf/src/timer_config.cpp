@@ -51,17 +51,19 @@ constexpr io_timers_t io_timers[MAX_IO_TIMERS] = {
  *   M2 (1) PC9  TIM8_CH4
  *   M3 (2) PA8  TIM1_CH1
  *   M4 (3) PA9  TIM1_CH2
- *   M6 (4) PB4  TIM3_CH1
- *   M7 (5) PB0  TIM3_CH3
- *   M8 (6) PB1  TIM3_CH4
+ *   M5 (4) PA10 TIM1_CH3
+ *   M6 (5) PB4  TIM3_CH1
+ *   M7 (6) PB0  TIM3_CH3
+ *   M8 (7) PB1  TIM3_CH4
  *
- * Note: there is no M5 on this board.
+ * PB3 is the onboard WS2812 LED strip data pin (not driven by PX4).
  */
 constexpr timer_io_channels_t timer_io_channels[MAX_TIMER_IO_CHANNELS] = {
 	initIOTimerChannel(io_timers, {Timer::Timer8, Timer::Channel3}, {GPIO::PortC, GPIO::Pin8}),
 	initIOTimerChannel(io_timers, {Timer::Timer8, Timer::Channel4}, {GPIO::PortC, GPIO::Pin9}),
 	initIOTimerChannel(io_timers, {Timer::Timer1, Timer::Channel1}, {GPIO::PortA, GPIO::Pin8}),
 	initIOTimerChannel(io_timers, {Timer::Timer1, Timer::Channel2}, {GPIO::PortA, GPIO::Pin9}),
+	initIOTimerChannel(io_timers, {Timer::Timer1, Timer::Channel3}, {GPIO::PortA, GPIO::Pin10}),
 	initIOTimerChannel(io_timers, {Timer::Timer3, Timer::Channel1}, {GPIO::PortB, GPIO::Pin4}),
 	initIOTimerChannel(io_timers, {Timer::Timer3, Timer::Channel3}, {GPIO::PortB, GPIO::Pin0}),
 	initIOTimerChannel(io_timers, {Timer::Timer3, Timer::Channel4}, {GPIO::PortB, GPIO::Pin1}),

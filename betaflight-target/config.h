@@ -42,10 +42,11 @@
 #define MOTOR2_PIN           PC9
 #define MOTOR3_PIN           PA8
 #define MOTOR4_PIN           PA9
+#define MOTOR5_PIN           PA10
 #define MOTOR6_PIN           PB4
 #define MOTOR7_PIN           PB0
 #define MOTOR8_PIN           PB1
-#define LED_STRIP_PIN        PA10
+#define LED_STRIP_PIN        PB3
 #define UART1_TX_PIN         PB6
 #define UART2_TX_PIN         PA2
 #define UART3_TX_PIN         PB10

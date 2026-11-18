@@ -36,7 +36,13 @@ param set-default SER_TEL1_BAUD 57600
 
 # --- Motor / control allocation ---------------------------------------------
 # Quad X, PX4 numbering: M1 PC8, M2 PC9, M3 PA8, M4 PA9
-# (M6 PB4 / M7 PB0 / M8 PB1 are available as extra outputs, not used by quad)
+# (M5 PA10 / M6 PB4 / M7 PB0 / M8 PB1 are available as extra outputs,
+#  not used by the default quad airframe)
+#
+# Hardware note: this board has 8 motor outputs. The factory Betaflight
+# dump used a 7-motor config (MOTOR5 NONE) and put LED_STRIP on PA10; the
+# actual hardware follows the HAKRCF405V2/CADDXF4 reference design:
+# MOTOR5 = PA10, LED_STRIP = PB3.
 param set CA_ROTOR_COUNT 4
 param set CA_ROTOR0_PX 1.0
 param set CA_ROTOR0_PY 1.0
