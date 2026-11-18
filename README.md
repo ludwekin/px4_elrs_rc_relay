@@ -36,7 +36,7 @@ Writing to `/dev/uinput` must be permitted.
   UART5 PC12/PD2, UART6 PC6/PC7
 - USB FS: PA11/PA12
 
-详细引脚/外设表见 [`docs/HSRCF405_TF_RESOURCES.md`](docs/HSRCF405_TF_RESOURCES.md)。
+详细资源文档见 [`docs/HSRCF405_TF_RESOURCES.md`](docs/HSRCF405_TF_RESOURCES.md)，完整引脚对照表（原厂 BF vs PX4、定时器/DMA）见 [`docs/PIN_MAP.md`](docs/PIN_MAP.md)。
 
 ## Firmware features
 
